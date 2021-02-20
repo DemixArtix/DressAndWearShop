@@ -30,7 +30,7 @@
               div(class="favorites-mini__size property")
                 div(class="description") Размеры
                 div(class="value") {{sizes}} RUS
-              FavoritesButton(:productId="_id" :inFavorites="inFavorites")
+              FavoritesButton(:productId="_id" :inFavorites="inFavorites" :path="path")
 </template>
 
 <script>
@@ -41,7 +41,7 @@
     name: "Favorites",
     components: {FavoritesButton},
     data: () => ({
-      showFavorites: false
+      showFavorites: false,
     }),
     computed: {
       ...mapGetters('favorites', ['favorites'])
@@ -142,6 +142,9 @@
         overflow-y: auto
       &__item
         display: flex
+        &:hover
+          .favorites-mini__heart
+            opacity: 1
       &__image
         width: 100px
         img
@@ -151,5 +154,9 @@
         display: flex
         flex-direction: column
         align-items: flex-start
+      &__size
+        margin-bottom: 5px
+      &__heart
+        opacity: 0
 
 </style>

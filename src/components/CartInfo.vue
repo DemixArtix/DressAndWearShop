@@ -22,7 +22,7 @@
             div(class="cart-mini__image" @click="toProductPage(path)")
               img(:src="images[0]")
             div(class="cart-mini__properties")
-              div(class="cart-mini__bran property")
+              div(class="cart-mini__brand property")
                 div(class="description") Бренд
                 div(class="value") {{brand}}
               div(class="cart-mini__price property")
@@ -35,6 +35,7 @@
                 div(class="description") Кол-во
                 div(class="value")
                   div(class="quantity-button minus" v-if="quantity > 1" @click="onChangeQuantity(productId, -1)")
+                  div(class="quantity-button hidden" v-else)
                   div {{quantity}} шт.
                   div(class="quantity-button plus" @click="onChangeQuantity(productId, 1)")
                   div(class="delete-button" @click="onDeleteCartItem(productId)")
@@ -57,23 +58,24 @@
 </template>
 
 <script>
-  import api from '@/plugins/api';
+  // import api from '@/plugins/api';
   import {mapGetters, mapActions} from 'vuex';
   import getToken from "../mixins/getToken";
+  import cart from "../mixins/cart";
 
   export default {
     name: "CartInfo",
     data: () => ({
       showMiniCart: false,
     }),
-    mixins: [getToken],
+    mixins: [getToken, cart],
     computed: {
       ...mapGetters('cart', ['allCart', 'totalQuantity']),
     },
     methods: {
       ...mapActions('categories', ['setCurrentProduct']),
       ...mapActions('cart', ['changeQuantity', 'deleteCartItem']),
-      toProductPage(path) {
+/*      toProductPage(path) {
         if(path !== this.$route.path) {
           this.$router.push({path});
           this.setCurrentProduct({
@@ -83,8 +85,8 @@
           })
         }
         return;
-      },
-      onChangeQuantity(productId, value) {
+      },*/
+/*      onChangeQuantity(productId, value) {
         console.log(productId, value);
         if(this.token()) {
           api.post('/change_quantity_in_cart',
@@ -106,8 +108,8 @@
             console.log(err)
           });
         }
-      },
-      onDeleteCartItem(productId) {
+      },*/
+/*      onDeleteCartItem(productId) {
         if(this.token()) {
           api.post('/delete_item_in_cart',
             {
@@ -127,7 +129,7 @@
             console.log(err)
           });
         }
-      }
+      }*/
     }
   }
 </script>
@@ -147,10 +149,11 @@
     margin-top: 12px
     font-size: 14px
   .quantity-button
+    opacity: 0
     cursor: pointer
     padding: 5px
     border-radius: 50%
-    background-color: rgba(orangered, 0.8)
+    background-color: rgba(orangered, 0.7)
     width: 8px
     height: 8px
     position: relative
@@ -174,6 +177,11 @@
     &:after
       height: 8px
       width: 2px
+  .hidden
+    opacity: 0
+    margin-right: 5px
+    cursor: default
+
 
   .cart
     &-info
@@ -239,7 +247,14 @@
         overflow-y: auto
       &__item
         display: flex
+        &:hover
+          .cart-mini__properties
+            >.cart-mini__quantity
+              >.value
+                >.plus,.minus,.delete-button
+                  opacity: 1
       &__image
+        cursor: pointer
         width: 100px
         img
           width: 100%
@@ -253,17 +268,22 @@
           display: flex
           align-items: center
         .delete-button
+          opacity: 0
           cursor: pointer
           margin-left: 10px
           width: 20px
           padding: 2px 5px
           &:hover
             path
-              fill: rgba(orangered, .8)
+              fill: rgba(orangered, 1)
+            polygon
+              fill: rgba(orangered, 1)
           path
-            fill: rgba(orangered, .1)
+            fill: rgba(orangered, .7)
+            stroke-width: 0
+            transition: 0s
           polygon
-            fill: rgba(orangered, .8)
+            fill: rgba(orangered, .7)
 
 
 </style>

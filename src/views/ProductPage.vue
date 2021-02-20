@@ -108,11 +108,13 @@
             }).then(res => {
             const product = res.data.product;
             if(product) {
+              product.path = this.$route.path;
               this.addFavoriteItem(product)
             } else {
               this.switchFavoritesLabel({
                 bool: false,
-                productId
+                productId,
+                path: this.$route.path
               })
             }
           });
@@ -140,7 +142,6 @@
               });
             }
             localStorage.setItem('favorites', JSON.stringify(favorites));
-            console.log(favorites)
           } else {
             const favArr = [productId];
             console.log(favArr);
@@ -210,7 +211,6 @@
         if(this.favorites && this.favorites.length) {
           this.addedToFavorites = this.favorites.find(item => {
             if(item._id === this.product._id) {
-              console.log(item);
               return item.inFavorites
             }
           });
@@ -228,7 +228,6 @@
         if(this.favorites && this.favorites.length) {
           this.addedToFavorites = this.favorites.find(item => {
             if(item._id === this.product._id) {
-              console.log(item);
               return item.inFavorites
             }
           });

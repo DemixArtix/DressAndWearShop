@@ -37,11 +37,14 @@ export default {
     REMOVE_FAVORITE_LIST (state) {
       state.favorites = null;
     },
-    SWITCH_FAVORITES_LABEL (state, { bool, productId }) {
-      const item = state.favorites.find(item => item._id === productId);
-      item.inFavorites = bool;
+    SWITCH_FAVORITES_LABEL (state,  product) {
+
+      if(product) {
+        Vue.set(product, 'inFavorites', true);
+        state.favorites.unshift(product);
+      }
       state.booleanSwitch = !state.booleanSwitch;
-      console.log(item);
+
     }
   },
   actions: {
@@ -58,8 +61,22 @@ export default {
     removeFavoriteList({commit}) {
       commit('REMOVE_FAVORITE_LIST')
     },
-    switchFavoritesLabel({commit}, params) {
-      commit('SWITCH_FAVORITES_LABEL', params);
+    switchFavoritesLabel({commit, state, rootGetters}, { bool, productId, path}) {
+      const item = state.favorites.find(item => item._id === productId);
+      if(!item) {
+        const splitPath = path.split('/').slice(2);
+        const [categoryName, subcategoryName, productIndex] = splitPath;
+        const category = rootGetters['categories/getCurrentCategory'](categoryName);
+        const subcategory = rootGetters['categories/getCurrentSubcategory'](category, subcategoryName);
+        const product = subcategory.goods[productIndex - 1];
+        product.path = path;
+        commit('SWITCH_FAVORITES_LABEL', product);
+      } else {
+        item.inFavorites = bool;
+        commit('SWITCH_FAVORITES_LABEL', null);
+      }
+
+
     }
   }
 }

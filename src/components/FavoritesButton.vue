@@ -18,7 +18,7 @@
         viewBox="-6 0 450.775 437.774"
         cursor="pointer")
         path(d="M316.722,29.761c66.852,0,121.053,54.202,121.053,121.041c0,110.478-218.893,257.212-218.893,257.212S0,266.569,0,150.801C0,67.584,54.202,29.761,121.041,29.761c40.262,0,75.827,19.745,97.841,49.976C240.899,49.506,276.47,29.761,316.722,29.761z")
-      div(class="favorites-mini__heart-title") Вернуть в избранные
+      div(class="favorites-mini__heart-title") Добавить в избранные
 </template>
 
 <script>
@@ -36,6 +36,10 @@
       inFavorites: {
         type: Boolean,
         default: true,
+      },
+      path: {
+        type: String,
+        default: '',
       }
     },
     mixins: [getToken],
@@ -58,7 +62,8 @@
               if(res.data.success === true) {
                 this.switchFavoritesLabel({
                   bool: !this.inFavorites,
-                  productId: this.productId
+                  productId: this.productId,
+                  path: this.path,
                 });
               }
             })
@@ -72,12 +77,19 @@
 
 <style scoped lang="sass">
   .favorites-mini__heart
-    margin-top: 5px
     display: flex
     align-items: center
+    cursor: pointer
+    &:hover
+      path
+        fill: rgba(orangered, 1)
+      .favorites-mini__heart-title
+        color: rgba(orangered, 1)
     path
-      fill: orangered
+      fill: rgba(orangered, .7)
     &-title
+      color: rgba(black, .7)
       font-size: 13px
       margin-left: 5px
+
 </style>
