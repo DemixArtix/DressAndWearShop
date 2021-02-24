@@ -73,6 +73,7 @@
     top: 0
     left: 0
     font-size: 10px
+    font-weight: 800
   .value
     text-align: left
     margin-top: 12px
@@ -127,7 +128,7 @@
     &-mini
       position: absolute
       cursor: default
-      width: 300px
+      width: 320px
       right: 0
       top: 50px
       background-color: white
@@ -142,7 +143,11 @@
         overflow-y: auto
       &__item
         display: flex
+        padding-top: 10px
+        margin-right: 10px
+        border-bottom: 1px solid rgba(black, .1)
         &:hover
+
           .favorites-mini__heart
             opacity: 1
       &__image

@@ -7,7 +7,7 @@
 
         div(class="cart-form__item phone")
           label(class="cart-form__label phone") Телефон
-          div(class="cart-form__block" v-if="") {{}}
+          div(class="cart-form__block" v-if="userPhone") {{userPhone}}
           div(class="cart-form__block" v-else )
             div(class="cart-form__input phone")
               input(
@@ -75,7 +75,7 @@
               )
 
 
-        div(class="cart-form__item building" v-if="settlementId")
+        div(class="cart-form__item building" v-if="settlementId ")
           div(class="cart-form__block building")
             div(class="cart-form__input building half")
               input(
@@ -115,11 +115,48 @@
                 @click="onSelectBuilding(id, unrestricted_value)"
                 v-html="matchedValue"
               )
+        div(class="cart-form__location_set"
+            v-if="buildingId !== ''"
+            )
+          div(class="cart-form__location_button"
+              @click="setAddress()") Установить адрес доставки
+
+
+        div(class="cart-form__item delivery-address" v-if="userAddresses")
+          label(class="cart-form__label delivery-address__label") Адрес доставки
+          div(class="cart-form__block")
+            div(
+              class="delivery-address__current"
+              )
+              div(class="delivery-address__current_text")
+                div(class="delivery-address__current_settlement") {{currentAddressSettlement}}
+                div(class="delivery-address__current_street") {{currentAddressStreet}}
+                div(class="delivery-address__current_building") {{currentAddressBuilding}}
+                div(
+                  class="delivery-address__current_apartment"
+                  v-if="currentAddressApartment"
+                  ) {{currentAddressApartment}}
+              div(class="delivery-address__current_arrow") вниз
+
+            div(class="delivery-address__list")
+              div(
+                class="delivery-address__item"
+                v-for="({ settlement, street, building, apartment }, index) in userAddresses"
+                @click="setCurrentAddress(index)"
+                :key="index"
+                )
+                div(class="delivery-address__settlement") {{settlement}},
+                div(class="delivery-address__street")  {{street}},
+                div(class="delivery-address__building")  {{building}}
+                div(class="delivery-address__building" v-if="apartment") , {{apartment}}
+
+
 
 
         div(class="cart-form__item name")
           label(class="cart-form__label name") Имя
-          div(class="cart-form__block")
+          div(class="cart-form__block" v-if="userName") {{userName}}
+          div(class="cart-form__block" v-else )
             div(class="cart-form__input name")
               input(
                 class="name"
@@ -143,7 +180,8 @@
 
         div(class="cart-form__item surname")
           label(class="cart-form__label surname") Фамилия
-          div(class="cart-form__block")
+          div(class="cart-form__block" v-if="userSurname") {{userSurname}}
+          div(class="cart-form__block" v-else )
             div(class="cart-form__input surname")
               input(
                 class="surname"
@@ -165,7 +203,8 @@
             ) Недопустимые символы в поле "фамилия"
         div(class="cart-form__item email")
           label(class="cart-form__label email") Электронная почта
-          div(class="cart-form__block")
+          div(class="cart-form__block" v-if="userEmail") {{userEmail}}
+          div(class="cart-form__block" v-else )
             div(class="cart-form__input email")
               input(
                 class="email"
@@ -265,7 +304,7 @@
   import getToken from "../mixins/getToken";
   import {mapGetters, mapActions} from 'vuex';
   import { email, required, minLength, maxLength } from 'vuelidate/lib/validators';
-  // import api from '@/plugins/api';
+  import api from '@/plugins/api';
   import addressApi from '@/plugins/addressApi';
   import FavoritesButton from "../components/FavoritesButton";
 
@@ -278,6 +317,7 @@
       name: '',
       surname: '',
       noneFormattedPhone: '',
+      currentAddress: null,
 
       settlement: '',
       optionsForSettlements: [],
@@ -342,7 +382,52 @@
     },
     computed: {
       ...mapGetters('cart', ['allCart']),
+      ...mapGetters('userData', ['getUserData']),
       ...mapGetters('favorites', ['favorites']),
+      userPhone() {
+        if(this.getUserData) {
+          return this.getUserData.phone;
+        }
+      },
+      userName() {
+        if(this.getUserData) {
+          return this.getUserData.name;
+        }
+      },
+      userSurname() {
+        if(this.getUserData) {
+          return this.getUserData.surname;
+        }
+      },
+      userEmail() {
+        if(this.getUserData) {
+          return this.getUserData.email;
+        }
+      },
+      userAddresses() {
+        if(this.getUserData) {
+          return this.getUserData.addresses;
+        }
+      },
+      showCurrentAddress() {
+        return this.currentAddress || this.userAddresses[0];
+      },
+      currentAddressSettlement() {
+        return this.showCurrentAddress.settlement;
+      },
+      currentAddressStreet() {
+        return this.showCurrentAddress.street;
+      },
+      currentAddressBuilding() {
+        return this.showCurrentAddress.building;
+      },
+      currentAddressApartment() {
+        if(this.showCurrentAddress.apartment) {
+          return this.showCurrentAddress.apartment;
+        } else {
+          return null
+        }
+      },
       objToArr() {
         return Object.values(this.allCart);
       },
@@ -379,6 +464,10 @@
     methods: {
       ...mapActions('categories', ['setCurrentProduct']),
       ...mapActions('cart', ['changeQuantity', 'deleteCartItem']),
+      ...mapActions('userData', ['refreshAddresses']),
+      setCurrentAddress(index) {
+        this.currentAddress = this.userAddresses[index];
+      },
       inFavorites(id) {
         if(this.favorites) {
           const item = this.favorites.find(({_id}) => _id === id) || null;
@@ -464,6 +553,33 @@
           }
         });
       },
+      setAddress() {
+        if(this.token()) {
+          api.post('/set_address',
+            {
+              data: {
+                settlement: this.settlement,
+                street: this.street,
+                building: this.building,
+                apartment: this.apartment
+              }
+            },
+            {
+              headers: {
+                'Authorization': this.token()
+              }
+            })
+            .then(res => {
+              const { success, message, addresses} = res.data;
+              if(success === true) {
+                this.refreshAddresses(addresses);
+              }
+              console.log(message);
+            }).catch(err => {
+            console.log(err)
+            });
+        }
+      }
     },
     watch: {
       phone: function() {
@@ -546,6 +662,7 @@
     &title
       text-align: left
       margin: 0 0 30px
+      font-weight: 900
 
     &form
       margin-top: 20px
@@ -555,8 +672,11 @@
           justify-content: space-between
           margin-bottom: 30px
           z-index: 1
+          &.street
+            margin-bottom: 20px
           &.building
             justify-content: flex-end
+            margin-bottom: 15px
         &label
           font-size: 18px
           font-weight: 700
@@ -565,13 +685,14 @@
           display: flex
           flex-direction: column
           position: relative
+
           &.building
-            width: 402px
+            width: 404px
             justify-content: space-between
             flex-direction: row
         &input
           align-self: flex-end
-          border: 1px solid rgba(black, .5)
+          border: 2px solid rgba(black, .3)
           width: 400px
           display: flex
           input
@@ -612,6 +733,20 @@
             font-size: 13px
             &:hover
               background-color: rgba(orangered, .5)
+
+          &set
+            display: flex
+            justify-content: flex-end
+            margin-bottom: 20px
+          &button
+            padding: 10px 20px
+            background-color: rgba(orangered, .7)
+            border-radius: 3px
+            font-weight: 700
+            color: white
+            cursor: pointer
+
+
     &order
       &__
         &block
@@ -727,6 +862,7 @@
   .description
     font-size: 10px
     padding-bottom: 3px
+    font-weight: 800
   .value
     font-size: 13px
     padding-bottom: 5px
@@ -802,6 +938,23 @@
       margin-left: 5px
       font-size: 13px
       color: rgba(black, .7)
+
+  .delivery-address
+    &__
+      &current
+        width: 404px
+        background-color: rgba(lightgrey, .5)
+        display: flex
+        align-items: center
+        height: 50px
+        justify-content: space-between
+        &_text
+          padding: 10px
+          width: 350px
+          display: flex
+          flex-wrap: wrap
+        &_arrow
+          padding: 5px
 
 
 </style>

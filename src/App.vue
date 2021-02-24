@@ -53,4 +53,8 @@
     margin: 0 auto;
   }
 
+  button {
+    font: 400 13.3px 'Nunito'
+  }
+
 </style>

@@ -4,7 +4,7 @@
       class="cart-logo"
       @mouseover="showMiniCart = true"
       @mouseleave="showMiniCart = false"
-      @click="")
+      @click="$router.push( {name: 'Cart'})")
       div(v-if="totalQuantity" class="cart-quantity")
         span {{totalQuantity}}
       svg(
@@ -33,7 +33,7 @@
                 div(class="value") {{size}} RUS
               div(class="cart-mini__quantity property")
                 div(class="description") Кол-во
-                div(class="value")
+                div(class="value quantity")
                   div(class="quantity-button minus" v-if="quantity > 1" @click="onChangeQuantity(productId, -1)")
                   div(class="quantity-button hidden" v-else)
                   div {{quantity}} шт.
@@ -138,16 +138,19 @@
   .property
     position: relative
     min-width: 40px
-    margin-top: 3px
+    margin-bottom: 3px
   .description
     position: absolute
     top: 0
     left: 0
     font-size: 10px
+    font-weight: 800
   .value
     text-align: left
     margin-top: 12px
     font-size: 14px
+    &.quantity
+      margin-top: 8px
   .quantity-button
     opacity: 0
     cursor: pointer
@@ -232,7 +235,7 @@
     &-mini
       position: absolute
       cursor: default
-      width: 300px
+      width: 320px
       right: 0
       top: 50px
       background-color: white
@@ -247,6 +250,9 @@
         overflow-y: auto
       &__item
         display: flex
+        padding-top: 10px
+        margin-right: 10px
+        border-bottom: 1px solid rgba(black, .1)
         &:hover
           .cart-mini__properties
             >.cart-mini__quantity
