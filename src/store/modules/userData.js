@@ -7,6 +7,7 @@ export default {
   },
   getters: {
     getUserData:({userData}) => userData,
+
   },
   mutations: {
     SET_USER_DATA(state, data) {

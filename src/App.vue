@@ -1,9 +1,17 @@
 <template>
-  <div v-if="categories" id="app" @click="hideSizes" class="container">
-    <router-link to="/crm">crm</router-link>
-    <Header/>
-    <Navbar/>
-    <router-view/>
+  <div
+      v-if="categories"
+      id="app"
+      @click="() => {
+        hideSizes();
+        hideAddresses();
+      }">
+    <div class="container">
+      <router-link to="/crm">crm</router-link>
+      <Header/>
+      <Navbar/>
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -17,10 +25,13 @@
       await this.loadCategories();
     },
     methods: {
-      ...mapActions('eventData', ['togglePanelOfSizes']),
+      ...mapActions('eventData', ['togglePanelOfSizes', 'togglePanelOfAddresses']),
       ...mapActions('categories', ['loadCategories']),
       hideSizes() {
         this.togglePanelOfSizes(false);
+      },
+      hideAddresses() {
+        this.togglePanelOfAddresses(false);
       },
     },
     computed: {

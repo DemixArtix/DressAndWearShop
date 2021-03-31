@@ -29,7 +29,7 @@
         )
           h4(class="auth-card__user_title") {{getUserData.name}} {{getUserData.surname}}
           div(class="auth-card__user_buttons")
-            button(class="button" @click="") Личный кабинет
+            button(class="button" @click="$router.push({name: 'PersonalArea'})") Личный кабинет
             button(class="button" @click="onSignOut") Выход
 
 
@@ -294,6 +294,7 @@
       ...mapActions('userData', ['setUserData', 'removeUserData']),
       ...mapActions('favorites', ['loadFavorites', "removeFavoriteList"]),
       ...mapActions('cart', ['setCart']),
+      ...mapActions('orders', ['setOrders']),
       async loadUserData(newToken) {
         const token = newToken || localStorage.getItem('token');
 
@@ -305,7 +306,7 @@
           };
           const user = await api.get('/user_data', header)
             .then(async res => {
-              const { userData, favorites, cart } = res.data;
+              const { userData, favorites, cart, orders } = res.data;
               if( userData === null) {
                 localStorage.removeItem('token');
                 return
@@ -313,6 +314,8 @@
               this.setUserData(userData);
               await this.setCart(cart);
               await this.loadFavorites(favorites);
+              await this.setOrders(orders);
+
             })
             .catch(err => {
               console.log(err);

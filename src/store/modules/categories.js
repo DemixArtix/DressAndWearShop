@@ -445,6 +445,15 @@ export default {
         goodsItemPath.sizes = (sizesPath.concat(size)).sort((prev, next) => prev - next);
       }
     },
+    ADD_PHOTO(state, {image, goodsItemIndex, subcategoryIndex, categoryIndex}) {
+      const goodsItemPath = state.categories[categoryIndex].subcategories[subcategoryIndex].goods[goodsItemIndex];
+      const imagesPath = goodsItemPath.images;
+      const duplicate = imagesPath.find(curImage => curImage === image) === image;
+      if(!duplicate) {
+        goodsItemPath.images = imagesPath.concat(image);
+      }
+    },
+
     DELETE_DETAIL_IN_ARRAY(state, {keyOfData, itemIndex, goodsItemIndex, subcategoryIndex, categoryIndex}) {
       state.
         categories[categoryIndex].

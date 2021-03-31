@@ -7,6 +7,8 @@ import Category from "../components/Category";
 import ProductsList from "../views/ProductsList";
 import ProductPage from "../views/ProductPage";
 import Cart from "../views/Cart";
+import PersonalArea from "../views/PersonalArea"
+import SuccessPaymentPage from "../views/SuccessPaymentPage";
 import CRM from "../views/CRM";
 
 Vue.use(VueRouter);
@@ -43,6 +45,16 @@ const routes = [
     path: '/cart',
     name: 'Cart',
     component: Cart
+  },
+  {
+    path: '/personal_area',
+    name: 'PersonalArea',
+    component: PersonalArea
+  },
+  {
+    path: '/success',
+    name: 'SuccessPaymentPage',
+    component: SuccessPaymentPage
   },
   {
     path: '/crm',

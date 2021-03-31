@@ -6,8 +6,8 @@
       @mouseleave="showFavorites = false"
       )
       div(class="favorites-patch" v-if="showFavorites")
-      div(v-if="favorites && favorites.length" class="favorites-quantity")
-        span {{favorites.length}}
+      div(v-if="favorites && favorites.length && inFavoritesLength" class="favorites-quantity")
+        span {{inFavoritesLength}}
       svg(
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
         viewBox="-9 0 530 511.97"
@@ -44,7 +44,10 @@
       showFavorites: false,
     }),
     computed: {
-      ...mapGetters('favorites', ['favorites'])
+      ...mapGetters('favorites', ['favorites']),
+      inFavoritesLength() {
+        return this.favorites.filter(item => item.inFavorites === true).length;
+      }
     },
     methods: {
       ...mapActions('categories', ['setCurrentProduct']),

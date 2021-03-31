@@ -7,9 +7,12 @@
       div(class="product-slider")
         div(class="product-slider__item" v-for="(image, index) in images" @mouseover="showImage(index)")
           img(:src="image")
+      FeedbackForm(v-if="evaluationValue" :evaluationValue="evaluationValue")
     div(class="product-block__right")
       div(class="product-info")
         span(class="product-info__title") {{product.brand}}
+      div(class="product-feedback")
+        RatingArea(@evaluationValue="onSetEvaluationValue" :productId="product._id")
       div(class="product-order")
         span(class="product-order__price") {{product.price}} ₽
         div(class="product-order__size" @click.stop)
@@ -34,10 +37,12 @@
   import {mapGetters, mapActions} from 'vuex';
   import CartPopup from "../components/CartPopup";
   import getToken from "../mixins/getToken";
+  import RatingArea from "../components/RatingArea";
+  import FeedbackForm from "../components/FeedbackForm";
 
   export default {
     name: "ProductPage",
-    components: {CartPopup},
+    components: {FeedbackForm, RatingArea, CartPopup},
     beforeMount() {
       this.setCurrentProduct({
           categoryName:this.categoryName,
@@ -50,6 +55,7 @@
       size: '',
       addedToFavorites: false,
       showCartPopup: false,
+      evaluationValue: null,
     }),
     mixins: [getToken],
     methods: {
@@ -159,6 +165,9 @@
       chooseSize(index) {
         this.size = this.sizes[index];
         this.togglePanelOfSizes(false)
+      },
+      onSetEvaluationValue(value) {
+        this.evaluationValue = value;
       }
     },
     computed: {
@@ -303,6 +312,7 @@
           text-align: left
           background-color: #fff
           transition: .5s
+          cursor: pointer
           &:after
             content: ''
             position: absolute
@@ -326,6 +336,7 @@
           width: inherit
           z-index: 2
         &select
+          cursor: pointer
           height: 20px
           padding: 10px
           border-top: 1px solid rgba(black, .1)
@@ -350,6 +361,7 @@
           color: #ffffff
           font-size: .9rem
           &-cart
+            cursor: pointer
             background-color: rgba(orangered, 0.8)
             padding: 10px 20px
             flex-basis: 60%
@@ -360,6 +372,7 @@
             &:hover
               background-color: orangered
           &-favorites
+            cursor: pointer
             width: 20px
             border-radius: 3px
             padding: 6px 10px

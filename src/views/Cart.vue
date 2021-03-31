@@ -28,10 +28,24 @@
             ) Должен быть в формате +7 (999) 888-77-66
 
 
-        div(class="cart-form__item settlement")
+        div(
+          class="cart-form__item settlement"
+          v-if="!userAddresses || addressIndexInDB || addressAdding"
+          )
+          div(
+            class="cart-form__cross settlement"
+            v-if="addressAdding || addressIndexInDB"
+            @click="cancelChanges()"
+            )
+            svg(
+              viewBox="0 0 365.696 365.696"
+              xmlns="http://www.w3.org/2000/svg")
+              path( d="m243.1875 182.859375 113.132812-113.132813c12.5-12.5 12.5-32.765624 0-45.246093l-15.082031-15.082031c-12.503906-12.503907-32.769531-12.503907-45.25 0l-113.128906 113.128906-113.132813-113.152344c-12.5-12.5-32.765624-12.5-45.246093 0l-15.105469 15.082031c-12.5 12.503907-12.5 32.769531 0 45.25l113.152344 113.152344-113.128906 113.128906c-12.503907 12.503907-12.503907 32.769531 0 45.25l15.082031 15.082031c12.5 12.5 32.765625 12.5 45.246093 0l113.132813-113.132812 113.128906 113.132812c12.503907 12.5 32.769531 12.5 45.25 0l15.082031-15.082031c12.5-12.503906 12.5-32.769531 0-45.25zm0 0")
+
           label(class="cart-form__label settlement") Населенный пункт
           div(class="cart-form__block")
             div(class="cart-form__input settlement")
+
               input(
                 class="settlement"
                 type="text"
@@ -51,7 +65,10 @@
                 )
 
 
-        div(class="cart-form__item street" v-if="settlementId")
+        div(
+          class="cart-form__item street"
+          v-if="( !userAddresses && settlementId ) || ( addressIndexInDB && settlementId ) || ( addressAdding && settlementId )"
+          )
           label(class="cart-form__label street") Адрес
           div(class="cart-form__block")
             div(class="cart-form__input street")
@@ -75,7 +92,10 @@
               )
 
 
-        div(class="cart-form__item building" v-if="settlementId ")
+        div(
+          class="cart-form__item building"
+          v-if="( !userAddresses || addressIndexInDB || addressAdding ) && settlementId"
+          )
           div(class="cart-form__block building")
             div(class="cart-form__input building half")
               input(
@@ -122,34 +142,75 @@
               @click="setAddress()") Установить адрес доставки
 
 
-        div(class="cart-form__item delivery-address" v-if="userAddresses")
+        div(class="cart-form__item delivery-address" v-if="userAddresses && !addressIndexInDB && !addressAdding")
           label(class="cart-form__label delivery-address__label") Адрес доставки
-          div(class="cart-form__block")
+          div(class="cart-form__block" @click.stop)
             div(
               class="delivery-address__current"
+              @click="togglePanel(panelOfAddresses)"
               )
               div(class="delivery-address__current_text")
-                div(class="delivery-address__current_settlement") {{currentAddressSettlement}}
-                div(class="delivery-address__current_street") {{currentAddressStreet}}
-                div(class="delivery-address__current_building") {{currentAddressBuilding}}
+                div(class="delivery-address__current_settlement address_item") {{currentAddressSettlement}},
+                div(class="delivery-address__current_street address_item") {{currentAddressStreet}},
+                div(class="delivery-address__current_building address_item") {{currentAddressBuilding}}
+                  span(v-if="currentAddressApartment") ,
                 div(
-                  class="delivery-address__current_apartment"
+                  class="delivery-address__current_apartment address_item"
                   v-if="currentAddressApartment"
-                  ) {{currentAddressApartment}}
-              div(class="delivery-address__current_arrow") вниз
+                  ) кв./офис {{currentAddressApartment}}
+              div(class="delivery-address__current_arrow" :class="activeClass")
+                svg(
+                  version="1.1"
+                  id="Capa_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  x="0px" y="0px"
+                  viewBox="0 0 451.847 451.847"
+                  style="enable-background:new 0 0 451.847 451.847;"
+                  xml:space="preserve")
+                    path(d="M225.923,354.706c-8.098,0-16.195-3.092-22.369-9.263L9.27,151.157c-12.359-12.359-12.359-32.397,0-44.751c12.354-12.354,32.388-12.354,44.748,0l171.905,171.915l171.906-171.909c12.359-12.354,32.391-12.354,44.744,0c12.365,12.354,12.365,32.392,0,44.751L248.292,345.449C242.115,351.621,234.018,354.706,225.923,354.706z")
 
-            div(class="delivery-address__list")
-              div(
-                class="delivery-address__item"
-                v-for="({ settlement, street, building, apartment }, index) in userAddresses"
-                @click="setCurrentAddress(index)"
-                :key="index"
+              div(class="delivery-address__list" v-if="panelOfAddresses")
+                div(
+                  class="delivery-address__item"
+                  v-for="({_id, settlement, settlementId , street, streetId, building, buildingId, apartment }, index) in userAddresses"
+                  @click="setCurrentAddress(index)"
+                  :key="index"
+                  )
+                  div(class="delivery-address__item_text")
+                    div(class="delivery-address__settlement address_item") {{settlement}},
+                    div(class="delivery-address__street address_item")  {{street}},
+                    div(class="delivery-address__building address_item")  {{building}}
+                      span(v-if="apartment") ,
+                    div(class="delivery-address__building address_item" v-if="apartment") кв./офис {{apartment}}
+                  div(class="delivery-address__button" @click.stop="showActionsWithAddress(index)")
+                    div(class="delivery-address__button_action" v-if="addressIndexInList === index")
+                      div(
+                        class="delivery-address__button_change item"
+                        @click.stop="changeAddress({_id,settlement, settlementId , street, streetId, building, buildingId, apartment })"
+                        ) изменить
+                      div(class="delivery-address__button_delete item"
+                        @click.stop="deleteAddress(_id)"
+                        ) удалить
+                    svg(
+
+                      viewBox="0 0 492.49284 492"
+                      xmlns="http://www.w3.org/2000/svg")
+                      path( d="m304.140625 82.472656-270.976563 270.996094c-1.363281 1.367188-2.347656 3.09375-2.816406 4.949219l-30.035156 120.554687c-.898438 3.628906.167969 7.488282 2.816406 10.136719 2.003906 2.003906 4.734375 3.113281 7.527344 3.113281.855469 0 1.730469-.105468 2.582031-.320312l120.554688-30.039063c1.878906-.46875 3.585937-1.449219 4.949219-2.8125l271-270.976562zm0 0")
+                      path( d="m476.875 45.523438-30.164062-30.164063c-20.160157-20.160156-55.296876-20.140625-75.433594 0l-36.949219 36.949219 105.597656 105.597656 36.949219-36.949219c10.070312-10.066406 15.617188-23.464843 15.617188-37.714843s-5.546876-27.648438-15.617188-37.71875zm0 0")
+
+                div(
+                  class="delivery-address__item add"
+                  @click.stop="addAddress()"
                 )
-                div(class="delivery-address__settlement") {{settlement}},
-                div(class="delivery-address__street")  {{street}},
-                div(class="delivery-address__building")  {{building}}
-                div(class="delivery-address__building" v-if="apartment") , {{apartment}}
-
+                  div(class="delivery-address__item_text") добавить новый адрес
+                  div(class="delivery-address__button" )
+                    svg(
+                      height="448pt"
+                      viewBox="0 0 448 448"
+                      width="448pt"
+                      xmlns="http://www.w3.org/2000/svg")
+                      path( d="m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0")
 
 
 
@@ -222,7 +283,7 @@
         div(class="cart-form__item comment")
           label(class="cart-form__label comment") Комментарий курьеру
           div(class="cart-form__input comment")
-            textarea(class="comment")
+            textarea(class="comment" v-model="comment")
 
 
       div(class="cart-goods__block")
@@ -248,8 +309,11 @@
                   div(class="quantity-button plus" @click="onChangeQuantity(productId, 1)")
 
               div(class="cart-goods__price property")
-                div(class="description") Цена
+                div(class="description" v-if="quantity === 1") Цена
+                div(class="description" v-else) Цена за ед.
                 div(class="value") {{price}} ₽
+                div(class="description" v-if="quantity > 1") Сумма
+                div(class="value" v-if="quantity > 1") {{price * quantity}} ₽
 
 
             div(class="corner-block")
@@ -285,13 +349,13 @@
             div(class="right") {{cartAmount}} ₽
           div(class="cart-order__delivery line")
             div(class="left") Доставка
-            div(class="right") {{(cartAmount * 0.03).toFixed(0)}} ₽
+            div(class="right") {{delivery}} ₽
           div(class="cart-order__total line")
             div(class="left") Итого
-            div(class="right") {{+cartAmount + +(cartAmount * 0.03).toFixed(0)}} ₽
+            div(class="right") {{sumTotal}} ₽
 
         div(class="cart-order__payment")
-          div(class="cart-order__payment_button") Оплатить заказ
+          div(class="cart-order__payment_button" @click="paymentOrder()") Оплатить заказ
 
 
 
@@ -318,6 +382,11 @@
       surname: '',
       noneFormattedPhone: '',
       currentAddress: null,
+      comment: '',
+
+      addressIndexInList: null,
+      addressIndexInDB: null,
+      addressAdding: false,
 
       settlement: '',
       optionsForSettlements: [],
@@ -384,6 +453,13 @@
       ...mapGetters('cart', ['allCart']),
       ...mapGetters('userData', ['getUserData']),
       ...mapGetters('favorites', ['favorites']),
+      ...mapGetters('eventData', ['panelOfAddresses']),
+      activeClass() {
+        return {
+          'active': this.panelOfAddresses,
+          null : !this.panelOfAddresses
+        }
+      },
       userPhone() {
         if(this.getUserData) {
           return this.getUserData.phone;
@@ -405,7 +481,7 @@
         }
       },
       userAddresses() {
-        if(this.getUserData) {
+        if(this.getUserData && this.getUserData.addresses && this.getUserData.addresses.length ) {
           return this.getUserData.addresses;
         }
       },
@@ -413,16 +489,22 @@
         return this.currentAddress || this.userAddresses[0];
       },
       currentAddressSettlement() {
-        return this.showCurrentAddress.settlement;
+        if(this.showCurrentAddress) {
+          return this.showCurrentAddress.settlement;
+        }
       },
       currentAddressStreet() {
-        return this.showCurrentAddress.street;
+        if(this.showCurrentAddress) {
+          return this.showCurrentAddress.street;
+        }
       },
       currentAddressBuilding() {
-        return this.showCurrentAddress.building;
+        if(this.showCurrentAddress) {
+          return this.showCurrentAddress.building;
+        }
       },
       currentAddressApartment() {
-        if(this.showCurrentAddress.apartment) {
+        if(this.showCurrentAddress && this.showCurrentAddress.apartment) {
           return this.showCurrentAddress.apartment;
         } else {
           return null
@@ -436,6 +518,12 @@
       },
       cartAmount() {
         return this.objToArr.reduce((acc, {price, quantity}) => acc + (+price * quantity), 0);
+      },
+      delivery() {
+        return (this.cartAmount * 0.03).toFixed(0);
+      },
+      sumTotal() {
+        return +this.cartAmount + +this.delivery;
       },
       numeralsToString() {
         return this.cartLength.toString()
@@ -465,6 +553,107 @@
       ...mapActions('categories', ['setCurrentProduct']),
       ...mapActions('cart', ['changeQuantity', 'deleteCartItem']),
       ...mapActions('userData', ['refreshAddresses']),
+      ...mapActions('eventData', ['togglePanelOfAddresses']),
+
+      async paymentOrder() {
+        if(this.token()) {
+          await api.post('/payment_order',
+            {
+              data: {
+                goodsAmount: this.cartAmount,
+                delivery: this.delivery,
+                amount: this.sumTotal,
+                comment: this.comment,
+                address: this.currentAddress ? this.currentAddress : this.userAddresses[0]
+              }
+            },
+            {
+              headers: {
+                'Authorization': this.token()
+              }
+            })
+            .then(res => {
+              console.log(res.data);
+              if(res.data) {
+                const { payUrl } = res.data.data;
+                console.log(res.data);
+                // window.location.replace(payUrl);
+              }
+            }).catch(err => {
+            console.log(err)
+          });
+        }
+      },
+
+      addAddress() {
+          this.addressAdding = true;
+          this.togglePanelOfAddresses(false);
+      },
+      changeAddress(item) {
+        const { _id, settlement, settlementId , street, streetId, building, buildingId, apartment } = item;
+        this.addressIndexInDB = _id;
+        this.settlement = settlement;
+        this.settlementId = settlementId;
+        this.street = street;
+        this.streetId = streetId;
+        this.building = building;
+        this.buildingId = buildingId;
+        this.apartment = apartment;
+
+        this.settlementSelected = this.streetSelected = this.buildingSelected = true;
+
+      },
+      cancelChanges() {
+        this.clearAddressLines();
+      },
+      clearAddressLines() {
+        this.addressIndexInDB = null;
+        this.addressAdding = false;
+        this.settlementId =
+          this.settlement =
+            this.street =
+              this.streetId =
+                this.building =
+                  this.buildingId =
+                    this.apartment = '';
+      },
+      deleteAddress(id) {
+
+        if(this.token()) {
+          api.post('/delete_address',
+            {
+              id
+            },
+            {
+              headers: {
+                'Authorization': this.token()
+              }
+            })
+            .then(res => {
+              const { success, message, addresses} = res.data;
+              if(success === true) {
+                this.refreshAddresses(addresses);
+              }
+              console.log(message);
+            }).catch(err => {
+            console.log(err)
+          });
+        }
+
+      },
+      showActionsWithAddress(index) {
+        if(index !== this.addressIndexInList) {
+          this.addressIndexInList = index;
+        } else {
+          this.addressIndexInList = null;
+        }
+      },
+      togglePanel(bool) {
+        this.togglePanelOfAddresses(!bool);
+        if(bool === false) {
+          this.addressIndexInList = null;
+        }
+      },
       setCurrentAddress(index) {
         this.currentAddress = this.userAddresses[index];
       },
@@ -514,7 +703,7 @@
         setTimeout(async () => {
           const endValue = requestBody;
           if(initValue === endValue && !selectionStatus) {
-            locationId = '';
+            this[locationId] = '';
             const requestObject = Object.assign({}, {query: requestBody}, requestParams);
             await addressApi.post('/',
               requestObject)
@@ -558,11 +747,20 @@
           api.post('/set_address',
             {
               data: {
+
+
                 settlement: this.settlement,
+                settlementId: this.settlementId,
+
                 street: this.street,
+                streetId: this.streetId,
+
                 building: this.building,
+                buildingId: this.buildingId,
+
                 apartment: this.apartment
-              }
+              },
+              id: this.addressIndexInDB || null
             },
             {
               headers: {
@@ -573,6 +771,7 @@
               const { success, message, addresses} = res.data;
               if(success === true) {
                 this.refreshAddresses(addresses);
+                this.clearAddressLines();
               }
               console.log(message);
             }).catch(err => {
@@ -596,7 +795,7 @@
         this.requestProcessing(
           this.settlement,
           this.settlementSelected,
-          this.settlementId,
+          'settlementId',
           {
             "from_bound": { "value": "city" },
             "to_bound": { "value": "settlement" },
@@ -610,7 +809,7 @@
             this.requestProcessing(
               this.street,
               this.streetSelected,
-              this.streetId,
+              'streetId',
               {
                 locations: [this.settlementId],
                 "from_bound": { "value": "street" },
@@ -626,7 +825,7 @@
           this.requestProcessing(
             this.building,
             this.buildingSelected,
-            this.buildingId,
+            'buildingId',
             {
               locations: [this.streetId],
               "from_bound": { "value": "house" },
@@ -667,7 +866,25 @@
     &form
       margin-top: 20px
       &__
+        &cross
+          height: 15px
+          width: 15px
+          padding: 10px
+          position: absolute
+          right: -15px
+          top: -15px
+          z-index: 5
+          border-radius: 50%
+          background-color: #FF7C4C
+          cursor: pointer
+          svg
+            fill: white
+          &:hover
+            background-color: orangered
+
         &item
+          &.settlement
+            position: relative
           display: flex
           justify-content: space-between
           margin-bottom: 30px
@@ -853,7 +1070,7 @@
           width: 250px
         &price
           margin-left: 10px
-          width: 50px
+          width: 70px
   .property
     padding: 0 5px
     display: flex
@@ -942,19 +1159,97 @@
   .delivery-address
     &__
       &current
+        cursor: pointer
+        position: relative
         width: 404px
-        background-color: rgba(lightgrey, .5)
+        background-color: rgba(lightgrey, .3)
         display: flex
         align-items: center
-        height: 50px
         justify-content: space-between
+
         &_text
-          padding: 10px
+          font-weight: 800
+          padding: 15px 10px
           width: 350px
           display: flex
           flex-wrap: wrap
         &_arrow
           padding: 5px
+          display: flex
+          align-items: center
+          margin-right: 15px
+          transition: .5s
+          svg
+            height: 15px
+      &list
+        position: absolute
+        top: 100%
+        left: 0
+        width: 400px
+        border: 2px solid rgba(lightgrey, .3)
+        border-top: none
+        background-color: white
+        z-index: 5
+        ov
+      &item
+        width: calc(404px - 24px)
+        display: flex
+        align-items: center
+        justify-content: space-between
+        padding: 10px
+        &.add
+          &:hover
+            >.delivery-address__button
+              background-color: orangered
+              border-radius: 50%
+              svg
+                fill: white
+          justify-content: flex-end
+          >.delivery-address__item_text
+            width: auto
+            margin-right: 10px
+        &:hover
+          background-color: rgba(lightgrey, .2)
 
+        &_text
+          display: flex
+          flex-wrap: wrap
+          width: 330px
+      &button
+        height: 35px
+        width: 35px
+        display: flex
+        align-items: center
+        justify-content: center
+        position: relative
+        &:hover
+          background-color: orangered
+          border-radius: 50%
+          svg
+            fill: white
+        &_action
+          position: absolute
+          bottom: calc(100% + 10px)
+          background-color: white
+          z-index: 5
+          border: 2px solid rgba(lightgrey, .3)
+          & .item
+            width: 95px
+            padding: 10px
+            font-weight: 700
+            &:hover
+              background-color: rgba(orangered, .9)
+              color: white
+        &_change
+        &_delete
+
+
+        svg
+          height: 20px
+  .address_item
+    margin-right: 5px
+  .active
+
+    transform: rotate(180deg)
 
 </style>

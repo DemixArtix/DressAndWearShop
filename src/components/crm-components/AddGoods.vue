@@ -63,13 +63,13 @@
           });
           return newArr;
         }
-        const sizes = restructureArray(this.sizes, 'item');
+        const sizes = restructureArray(this.sizes, 'item').sort((prev, next) => prev - next);
         const images = restructureArray(this.images, 'src');
         if(this.brand && this.price && sizes.length !== 0 && images.length !== 0) {
           this.addGoods({
             goodsItem: {
               brand: this.brand,
-              price: this.price,
+              price: this.price.replace(/\D/g, ''),
               sizes,
               images
             },

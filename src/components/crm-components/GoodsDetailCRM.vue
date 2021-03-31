@@ -53,7 +53,7 @@
         const newData = this.$refs.input.value;
         if(newData && newData !== this.data) {
           this.changeDetail({
-            newData,
+            newData: this.keyOfData === 'price' ? newData.replace(/\D/g, '') : newData,
             keyOfData: this.keyOfData,
             goodIndex: this.goodIndex,
             subcategoryIndex: this.subcategoryIndex,

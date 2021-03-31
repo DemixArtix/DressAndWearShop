@@ -9,7 +9,8 @@
           :style="{ width: widthOfLink + 'px'}"
           @mouseover="showImage(index)")
           div
-        img(class="card-image" :src="src || defaultImage")
+        div(class="card-image")
+          img(:src="src || defaultImage")
     div(class="card-info")
       span(class="card-price") {{good.price}} ₽
       span(class="card-label") {{good.brand}}
@@ -90,6 +91,7 @@
           opacity: 1
     &link
       height: 333.33px
+      width: 100%
       z-index: 3
       &:hover
         div
@@ -100,9 +102,17 @@
         border-radius: 5px
         background-color: rgba(orangered, 0.5)
     &image
-      z-index: 2
-      position: absolute
+      display: flex
+      justify-content: center
+      height: 100%
       width: 100%
+      position: absolute
+      left: 0
+      top: 0
+      img
+        z-index: 2
+        max-width: 100%
+        max-height: 100%
     &info
       display: flex
       flex-direction: column

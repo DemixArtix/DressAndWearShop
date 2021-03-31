@@ -7,6 +7,7 @@ import eventData from "./modules/eventData"
 import cart from './modules/cart'
 import favorites from './modules/favorites'
 import userData from './modules/userData'
+import orders from './modules/orders'
 
 export default new Vuex.Store({
   state: {
@@ -21,5 +22,6 @@ export default new Vuex.Store({
     cart,
     favorites,
     userData,
+    orders
   }
 })

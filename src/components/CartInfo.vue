@@ -15,7 +15,7 @@
         path(d="m166 266.717c-8.284 0-15 6.716-15 15v110c0 8.284 6.716 15 15 15s15-6.716 15-15v-110c0-8.284-6.715-15-15-15z")
         path(d="m256 266.717c-8.284 0-15 6.716-15 15v110c0 8.284 6.716 15 15 15s15-6.716 15-15v-110c0-8.284-6.716-15-15-15z")
         path(d="m346 266.717c-8.284 0-15 6.716-15 15v110c0 8.284 6.716 15 15 15s15-6.716 15-15v-110c-.001-8.284-6.716-15-15-15z")
-      div(class="cart-mini" v-if="showMiniCart && totalQuantity !== 0")
+      div(class="cart-mini" @click.stop v-if="showMiniCart && totalQuantity !== 0")
         div(class="cart-mini__title") Товары в корзине
         div(class="cart-mini__list")
           div(class="cart-mini__item" v-for="{productId, brand, images, price, size, quantity, path } in allCart")

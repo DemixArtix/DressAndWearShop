@@ -29,6 +29,11 @@ export default {
       console.log(response);
       commit('categories/ADD_SIZE', params, { root: true })
     },
+    async addPhoto({commit}, params) {
+      const response = await api.post('/photo',  params);
+      console.log(response);
+      commit('categories/ADD_PHOTO', params, { root: true })
+    },
     async changeCategory({commit}, params) {
       const response = await api.put('/category',  params);
       console.log(response);

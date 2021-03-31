@@ -55,6 +55,14 @@
                 :subcategoryIndex="subcategoryIndex"
                 :categoryIndex="categoryIndex"
                 )
+            li(class="crm-goods__images_item add")
+              img(width="100px" :src="imageSource")
+              button(v-if="!addPhotoTemplate" @click="addPhotoTemplate = !addPhotoTemplate") Добавить фото
+              div(class="crm-goods__images_edit" v-if="addPhotoTemplate")
+                textarea(class="crm-goods__images_area" ref="imageInput" v-model="imageSource" placeholder="source")
+                div
+                  button(@click="onAddPhoto")  ok
+                  button(@click="addPhotoTemplate = !addPhotoTemplate")  cancel
 
 </template>
 
@@ -89,6 +97,8 @@
       showDetails: false,
       deleteTemplate: false,
       addSizeTemplate: false,
+      addPhotoTemplate: false,
+      imageSource: null,
     }),
     computed: {
       brand() {
@@ -105,7 +115,7 @@
       },
     },
     methods: {
-      ...mapActions('categories', ['deleteGoodsItem', 'addSize']),
+      ...mapActions('categories', ['deleteGoodsItem', 'addSize', 'addPhoto']),
       onDelete() {
         this.deleteGoodsItem({
           goodsItemIndex: this.goodIndex,
@@ -125,6 +135,19 @@
           })
         }
         this.addSizeTemplate = false;
+      },
+      onAddPhoto() {
+        const image = this.$refs.imageInput.value;
+        if(image) {
+          this.addPhoto({
+            image,
+            goodsItemIndex: this.goodIndex,
+            subcategoryIndex: this.subcategoryIndex,
+            categoryIndex: this.categoryIndex,
+          })
+        }
+        this.imageSource = null;
+        this.addSizeTemplate = false;
       }
     }
   }
@@ -134,6 +157,23 @@
   .crm-goods__
     &item
       margin-left: 20px
+    &images
+      &_item
+        padding: 10px
+        margin: 5px
+        box-shadow: 0 0 5px rgba(#000, .5)
+        transition: .1s
+        display: flex
+        flex-direction: column
+        &.add
+          justify-content: flex-end
+        &:hover
+          box-shadow: 0 0 10px rgba(#000, .5)
+      &_edit
+        display: flex
+        flex-direction: column
+      &_area
+        min-width: 450px
     &brand
       padding: 10px
       border-radius: 3px

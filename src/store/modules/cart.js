@@ -15,7 +15,7 @@ export default {
   },
   mutations: {
     ADD_TO_CART(state, product) {
-      state.cart[product.productId] = product;
+      Vue.set(state.cart, product.productId, product);
       state.lastAddedItemId = product.productId;
     },
     INCREASE_QUANTITY(state, productId) {
