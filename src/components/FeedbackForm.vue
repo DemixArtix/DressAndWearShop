@@ -86,7 +86,8 @@
 
 
       div(class="feedback-size__range")
-        div(class="feedback-size__line")
+        div(class="feedback-size__line" @click="lineEvent" ref="line")
+          div(class="feedback-size__mark" @mousedown="markEvent(true)" ref="mark")
         div(class="feedback-size__list")
           div(class="feedback-size__dote" v-for="({value, translate}, index) in doteData" :key="index")
             div(class="feedback-size__dote_input")
@@ -101,6 +102,7 @@
 <script>
   import api from '@/plugins/api';
   import getToken from "../mixins/getToken";
+  import {mapGetters, mapActions} from "vuex";
 
 
   export default {
@@ -123,7 +125,9 @@
           value: 'bigger',
           translate: 'Большемерит',
         }
-      ]
+      ],
+      initX: null,
+
     }),
     mounted() {
       this.ratingValue = this.evaluationValue ? this.evaluationValue : 0;
@@ -136,8 +140,31 @@
       }
     },
     computed: {
+      ...mapGetters('eventData', ["mouseX", "activateFeedbackRange"]),
+      lineCoordinates() {
+        return this.$refs.line.getBoundingClientRect()
+      },
+      lineCoordinateLeft() {
+        return this.lineCoordinates.left + window.pageXOffset;
+      },
+      lineCoordinateRight() {
+        return this.lineCoordinates.right + window.pageXOffset;
+      },
+
     },
     methods: {
+      ...mapActions('eventData', ["toggleFeedbackRange", 'setMouseCoordinateX']),
+      lineEvent(e) {
+        // this.markMove(e.pageX);
+      },
+      markEvent(bool) {
+        this.toggleFeedbackRange(bool);
+      },
+      markMove(x) {
+        if( x >= this.lineCoordinateLeft && x <= this.lineCoordinateRight ) {
+          this.$refs.mark.style.left = ( x - 10 - this.lineCoordinateLeft ) + 'px';
+        }
+      },
       dragoverEffect(e) {
         const imagesForm = this.$refs.imagesForm;
         // console.dir(imagesForm);
@@ -211,7 +238,37 @@
         console.log(value);
         this.ratingValue = value;
       }
-    }
+    },
+    watch: {
+      mouseX: function () {
+        if(this.activateFeedbackRange) {
+          this.markMove(this.mouseX)
+        }
+      },
+      activateFeedbackRange: function () {
+        if(!this.activateFeedbackRange) {
+          // console.log(this.lineCoordinateLeft);
+          // console.log(this.lineCoordinateRight);
+          const range = this.lineCoordinateRight - this.lineCoordinateLeft;
+          const dotesQuantity = this.doteData.length;
+          const x = this.mouseX - this.lineCoordinateLeft;
+          const segmentLength = range / ( dotesQuantity - 1 );
+          // console.log(segmentLength);
+          let left = 0;
+          let smallestDifference = null;
+          for(let item = 0; item < dotesQuantity; item++) {
+            const difference = Math.abs(x - (item * segmentLength));
+            if(difference < smallestDifference || item === 0 ) {
+              smallestDifference = difference;
+              left = item * segmentLength
+            }
+            console.log(left);
+            // console.log(item, difference);
+          }
+          this.$refs.mark.style.left = (left - 10 ) + 'px'
+        }
+      }
+    },
   }
 </script>
 
@@ -405,6 +462,17 @@
           right: 4px
           height: 10px
           cursor: pointer
+        &mark
+          position: absolute
+          left: -6px
+          top: -5px
+          width: 10px
+          height: 10px
+          border: 5px solid orangered
+          background-color: white
+          border-radius: 50%
+          z-index: 5
+          animation: .5s linear appearance
         &list
           display: flex
           justify-content: space-between
@@ -488,5 +556,10 @@
   .dragover
     background-color: rgba(orangered, .05)
     outline-offset: -2px
+  @keyframes appearance
+    from
+      border-width: 0px
+    to
+      border-width: 5px
 
 </style>

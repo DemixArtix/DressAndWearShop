@@ -5,7 +5,10 @@
       @click="() => {
         hideSizes();
         hideAddresses();
-      }">
+      }"
+      @mousemove="sendMouseCoordinates"
+      @mouseup="deactivateFeedbackRange(false)"
+  >
     <div class="container">
       <router-link to="/crm">crm</router-link>
       <Header/>
@@ -25,7 +28,11 @@
       await this.loadCategories();
     },
     methods: {
-      ...mapActions('eventData', ['togglePanelOfSizes', 'togglePanelOfAddresses']),
+      ...mapActions('eventData',
+        ['togglePanelOfSizes',
+          'togglePanelOfAddresses',
+          "toggleFeedbackRange",
+          'setMouseCoordinateX']),
       ...mapActions('categories', ['loadCategories']),
       hideSizes() {
         this.togglePanelOfSizes(false);
@@ -33,6 +40,12 @@
       hideAddresses() {
         this.togglePanelOfAddresses(false);
       },
+      sendMouseCoordinates(e) {
+        this.setMouseCoordinateX(e.pageX);
+      },
+      deactivateFeedbackRange() {
+        this.toggleFeedbackRange(false)
+      }
     },
     computed: {
       ...mapGetters('categories', ['categories'])
